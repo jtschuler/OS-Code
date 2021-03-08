@@ -13,14 +13,18 @@ COMPILE = $(CC) $(CFLAGS) -c -o		# compile to .o files
 project2: bin/project2.o
 	$(LINK) $@ $^
 
-bin/project2.o: src/project2.c bin
+bin/project2.o: src/project2.c
 	$(COMPILE) $@ $<
 
 lint: src/project2.c
 	cpplint --root=. $^
 
 clean:
+<<<<<<< Updated upstream
 	rm -f bin/* project2
+=======
+	rm -f bin/* hello
 
 bin:
 	mkdir bin
+>>>>>>> Stashed changes
