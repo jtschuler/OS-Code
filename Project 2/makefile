@@ -20,4 +20,4 @@ lint: src/project2.c
 	cpplint --root=. $^
 
 clean:
-	rm -f bin/* hello
+	rm -f bin/* project2

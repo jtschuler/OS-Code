@@ -75,7 +75,7 @@ int main(int argc, char* argv[]) {
         printf("Parent waiting on child...\n");
         int status;
         wait(&status);
-        if(status != 0) {
+        if (status != 0) {
             perror("Error in child! Parent exiting...\n");
             exit(1);
         }
@@ -110,10 +110,12 @@ int main(int argc, char* argv[]) {
 
         // regex building
         // len: 8 + 4*len(target) + 1 (for null char)
-        size_t len = 9 + 4 * strlen(target_word);
         printf("\nTarget: '%s'\n", target_word);
-        char pattern[len];
-        strcpy(pattern, ".*\\b");
+        char pattern[BUF_SIZE];
+        int pos;
+        int size = BUF_SIZE;
+        pos = snprintf(pattern, size, ".*\\b");
+        size -= pos;
         char add[5];
         for (int i = 0; i < strlen(target_word); ++i) {
             char curr = target_word[i];
@@ -122,12 +124,19 @@ int main(int argc, char* argv[]) {
             add[2] = tolower(curr);
             add[3] = ']';
             add[4] = '\0';
-            strcat(pattern, add);
+            pos += snprintf(pattern + pos, size, "%s", add);
+            size -= pos;
         }
-        strcat(pattern, "\\b.*");
+        pos += snprintf(pattern + pos, size, "\\b.*");
+        if (pos > BUF_SIZE) {
+            perror("Regex buffer size exceeded\n");
+            exit(1);
+        }
+
+
         printf("Regex: %s\n", pattern);
         regex_t regex;
-        if(regcomp(&regex, pattern, 0) == 0) {
+        if (regcomp(&regex, pattern, 0) == 0) {
             printf("Regex compilation successful\n\n");
         } else {
             perror("Regex compilaton failure\n");
@@ -139,8 +148,7 @@ int main(int argc, char* argv[]) {
         char * line;
         char * state;
         line = strtok_r(buffer, "\n", &state);
-        do
-        {
+        do {
             // Match
             if (regexec(&regex, line, 0, NULL, 0) == 0) {
                 printf("Match on '%s'\n", line);
