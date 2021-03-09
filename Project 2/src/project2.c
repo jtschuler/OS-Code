@@ -109,13 +109,11 @@ int main(int argc, char* argv[]) {
         printf("\n");
 
         // regex building
-        // len: 8 + 4*len(target) + 1 (for null char)
+        // length: 4 + 4*len(target) + 1 (for null char)
         printf("\nTarget: '%s'\n", target_word);
-        char pattern[BUF_SIZE];
-        int pos;
-        int size = BUF_SIZE;
-        pos = snprintf(pattern, size, ".*\\b");
-        size -= pos;
+        int size = 5 + 4*strlen(target_word);
+        char pattern[size];
+        strcpy(pattern, "\\b");
         char add[5];
         for (int i = 0; i < strlen(target_word); ++i) {
             char curr = target_word[i];
@@ -124,15 +122,9 @@ int main(int argc, char* argv[]) {
             add[2] = tolower(curr);
             add[3] = ']';
             add[4] = '\0';
-            pos += snprintf(pattern + pos, size, "%s", add);
-            size -= pos;
+            strcat(pattern, add);
         }
-        pos += snprintf(pattern + pos, size, "\\b.*");
-        if (pos > BUF_SIZE) {
-            perror("Regex buffer size exceeded\n");
-            exit(1);
-        }
-
+        strcat(pattern, "\\b\0");
 
         printf("Regex: %s\n", pattern);
         regex_t regex;
