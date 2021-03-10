@@ -50,7 +50,7 @@ int main(int argc, char* argv[]) {
             exit(1);
         }
 
-        // Create buffer to use with reading file and writing to stdout
+        // Create/initialize buffers to use with reading file and writing to stdout
         char buffer[BUF_SIZE];
         for (int i = 0; i < BUF_SIZE; ++i) {
             buffer[i] = '\0';
@@ -71,7 +71,7 @@ int main(int argc, char* argv[]) {
                 kill(pid, SIGKILL);
                 exit(1);
             }
-            // TODO
+            // Write matches from the current block
             while ((bytes_read_socket = read(sv[0], &read_buffer, BUF_SIZE)) > 0) {
                 write(1, &read_buffer, bytes_read_socket);
                 if (read_buffer[bytes_read_socket - 1] == '\0')
@@ -79,12 +79,11 @@ int main(int argc, char* argv[]) {
             }
         }
 
-        // Send end of file
+        // Send end of file (and extra newline just in case)
         write(sv[0], "\n\0", 2);
         close(file);
-        //printf("\nFinished writing\n");
 
-        // Print lines written to socket
+        // Print final lines written from socket to stdout
         while ((bytes_read_socket = read(sv[0], &read_buffer, BUF_SIZE)) > 0) {
             write(1, &read_buffer, bytes_read_socket);
             if (read_buffer[bytes_read_socket - 1] == '\0') {
@@ -117,33 +116,31 @@ int main(int argc, char* argv[]) {
             exit(1);
         }
 
-        // Read from socket
+        // Create and initialize buffers/variables for socket use
         char buffer[BUF_SIZE];
         for (int i = 0; i < BUF_SIZE; ++i) {
             buffer[i] = '\0';
         }
-        ssize_t bytes_read, bytes_written, line_length;
         char line[BUF_SIZE];
         for (int i = 0; i < BUF_SIZE; ++i) {
             line[i] = '\0';
         }
+        ssize_t bytes_read, bytes_written, line_length;
         int start = 0;
-        //int line_finished = 0;;
+        int line_finished = 1;
+
+        // Loop to read incoming socket data
         while ((bytes_read = read(sv[1], &buffer, BUF_SIZE)) > 0) {
             // Break on lines and match pattern
-            // printf("Bytes: %ld\tBuffer read...\n", bytes_read);
-            /*if (bytes_read == 2)
-                printf("%s", buffer);*/
             start = 0;
             for (int i = 0; i < bytes_read; ++i) {
                 if (buffer[i] == '\n') {
-                    //if (line_finished == 1)
+                    if (line_finished == 1)
                         strncpy(line, buffer+start, i - start);
-                    //else
-                    //    strncat(line, buffer+start, i - start);
-                    //line_finished = 1;
-                    //printf("Printing line: %s\n", line);
+                    else
+                        strncat(line, buffer+start, i - start);
                     line_length = strlen(line);
+                    line_finished = 1;
                     if (regexec(&regex, line, 0, NULL, 0) == 0) {
                         // write data to socket
                         bytes_written = write(sv[1], line, line_length);
@@ -158,30 +155,36 @@ int main(int argc, char* argv[]) {
                         line[j] = '\0';
                     }
                     start = i + 1;
-                } //else 
-                    //line_finished = 0;
+                }
             }
 
-            write(sv[1], "\0", 1);
-            //printf("Endl written...\n");
+            // Make sure this line actually completed
+            if (start < bytes_read) {
+                strncpy(line, buffer+start, bytes_read - start);
+                line_finished = 0;
+            }
 
+            // Write to signal finished with block
+            write(sv[1], "\0", 1);
+
+            // End of file recieved
             if (buffer[bytes_read - 1] == '\0') {
-                //printf("end encountered\n");
                 break;
             }
         }
-
-        // Write end of file
-        write(sv[1], "\0", 1);
 
         // delete regex
         regfree(&regex);
     }
 
     if (pid == 0) {
+        // Close file descriptors
         close(sv[1]);
     } else {
+        // Close file descriptors
         close(sv[0]);
+
+        // Wait and check child exit status
         int status;
         wait(&status);
         if (status != 0) {
@@ -189,6 +192,7 @@ int main(int argc, char* argv[]) {
             exit(1);
         }
 
+        // Program finished
         printf("\nDone.\n");
     }
     return 0;
