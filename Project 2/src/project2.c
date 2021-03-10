@@ -60,6 +60,8 @@ int main(int argc, char* argv[]) {
             read_buffer[i] = '\0';
         }
 
+        printf("\nMatching Lines:\n");
+
         // Read data from file into socket
         ssize_t bytes_read_file, bytes_read_socket, bytes_written;
         while ((bytes_read_file = read(file, &buffer, BUF_SIZE)) > 0) {
@@ -70,20 +72,22 @@ int main(int argc, char* argv[]) {
                 exit(1);
             }
             // TODO
-            bytes_read_socket = read(sv[0], &read_buffer, BUF_SIZE);
-            write(1, &read_buffer, bytes_read_socket);
+            while ((bytes_read_socket = read(sv[0], &read_buffer, BUF_SIZE)) > 0) {
+                write(1, &read_buffer, bytes_read_socket);
+                if (read_buffer[bytes_read_socket - 1] == '\0')
+                    break;
+            }
         }
 
         // Send end of file
         write(sv[0], "\n\0", 2);
         close(file);
-        printf("Finished writing");
+        //printf("\nFinished writing\n");
 
         // Print lines written to socket
-        printf("\nMatching Lines:\n");
-        while ((bytes_read_socket = read(sv[0], &buffer, BUF_SIZE)) > 0) {
-            write(1, &buffer, bytes_read_socket);
-            if (buffer[bytes_read_socket - 1] == '\0') {
+        while ((bytes_read_socket = read(sv[0], &read_buffer, BUF_SIZE)) > 0) {
+            write(1, &read_buffer, bytes_read_socket);
+            if (read_buffer[bytes_read_socket - 1] == '\0') {
                 break;
             }
         }
@@ -124,18 +128,21 @@ int main(int argc, char* argv[]) {
             line[i] = '\0';
         }
         int start = 0;
-        int line_finished = 0;
+        //int line_finished = 0;;
         while ((bytes_read = read(sv[1], &buffer, BUF_SIZE)) > 0) {
             // Break on lines and match pattern
-            write(1, &buffer, bytes_read);
+            // printf("Bytes: %ld\tBuffer read...\n", bytes_read);
+            /*if (bytes_read == 2)
+                printf("%s", buffer);*/
+            start = 0;
             for (int i = 0; i < bytes_read; ++i) {
                 if (buffer[i] == '\n') {
-                    if (line_finished == 1)
+                    //if (line_finished == 1)
                         strncpy(line, buffer+start, i - start);
-                    else
-                        strncat(line, buffer+start, i - start);
-                    line_finished = 1;
-                    printf("Printing line: %s\n", line);
+                    //else
+                    //    strncat(line, buffer+start, i - start);
+                    //line_finished = 1;
+                    //printf("Printing line: %s\n", line);
                     line_length = strlen(line);
                     if (regexec(&regex, line, 0, NULL, 0) == 0) {
                         // write data to socket
@@ -151,11 +158,15 @@ int main(int argc, char* argv[]) {
                         line[j] = '\0';
                     }
                     start = i + 1;
-                }
+                } //else 
+                    //line_finished = 0;
             }
 
+            write(sv[1], "\0", 1);
+            //printf("Endl written...\n");
+
             if (buffer[bytes_read - 1] == '\0') {
-                printf("end encountered\n");
+                //printf("end encountered\n");
                 break;
             }
         }
@@ -169,7 +180,6 @@ int main(int argc, char* argv[]) {
 
     if (pid == 0) {
         close(sv[1]);
-        printf("Child done\n");
     } else {
         close(sv[0]);
         int status;
