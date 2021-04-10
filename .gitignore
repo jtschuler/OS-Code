@@ -1,6 +1,7 @@
 .vscode/*
 *.code-workspace
 project2
+project3
 *.tar.gz
 
 # Local History for Visual Studio Code
