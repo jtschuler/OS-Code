@@ -53,8 +53,10 @@ void *FindMatchingLines(void *threadargs) {
     // Split on endlines
     for (size_t i = 0; i < thsize; ++i) {
         s += shared_mem[offset + i];
+
         // Line complete
         if (shared_mem[offset + i] == '\n') {
+            
             // Line matched or first line in thread
             if (v.size() == 0 || regex_search(s, reg))
                 v.push_back(s);
