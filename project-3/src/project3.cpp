@@ -9,7 +9,6 @@
 #include <semaphore.h>
 #include <pthread.h>
 
-#include <filesystem>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -17,8 +16,7 @@
 #include <regex>
 
 using std::ifstream;
-using std::filesystem::path;
-using std::filesystem::file_size;
+using std::ios;
 using std::string;
 using std::vector;
 using std::cout;
@@ -91,7 +89,10 @@ int main(int argc, char* argv[]) {
     // Reads file name/size and target word from arguments
     string file_path = argv[1];
     string target_word = argv[2];
-    size_t fsize = file_size(file_path);
+
+    ifstream in_file(file_path, ios::binary);
+    in_file.seekg(0, ios::end);
+    size_t fsize = in_file.tellg();
 
     // Initialize regex
     reg = regex ("\\b" + target_word + "\\b", regex::icase);
@@ -152,7 +153,6 @@ int main(int argc, char* argv[]) {
             // Create thread
             pthread_create(&threads[i], NULL, &FindMatchingLines, (void *)&thread_args[i]);
         }
-        cout << "threads created" << endl;
 
         /* Merge results */
         string intermediate = "";
