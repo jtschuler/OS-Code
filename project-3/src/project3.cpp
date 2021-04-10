@@ -90,9 +90,9 @@ int main(int argc, char* argv[]) {
     string file_path = argv[1];
     string target_word = argv[2];
 
-    ifstream in_file(file_path, ios::binary);
-    in_file.seekg(0, ios::end);
-    size_t fsize = in_file.tellg();
+    ifstream file(file_path, ios::binary);
+    file.seekg(0, ios::end);
+    size_t fsize = file.tellg();
 
     // Initialize regex
     reg = regex ("\\b" + target_word + "\\b", regex::icase);
