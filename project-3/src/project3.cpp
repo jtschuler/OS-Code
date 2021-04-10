@@ -75,6 +75,13 @@ void *FindMatchingLines(void *threadargs) {
     pthread_exit(NULL);
 }
 
+void PushString(string s, size_t &pos) {
+    for (char c : s) {
+        shared_mem[pos] = c;
+        ++pos;
+    }
+}
+
 int main(int argc, char* argv[]) {
     if (argc < 3 || argc > 3) {
         perror("Error in number of arguments. Specify both file name and target word!");
@@ -90,11 +97,13 @@ int main(int argc, char* argv[]) {
     reg = regex ("\\b" + target_word + "\\b", regex::icase);
 
     // Initialize shared memory for file and semaphore
-    shared_mem = (char*)(mmap(NULL, file_size(file_path), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANON, 0, 0));
+    shared_mem = (char*)(mmap(NULL, fsize, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANON, 0, 0));
     sem_t *semaphore = (sem_t*)mmap(NULL, sizeof(sem_t), PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_SHARED, 0, 0 );
     sem_init(semaphore, 1, 0);
 
-    // TODO shared memory?
+    // Create and initialize variable to store total size of matches;
+    size_t* match_size = (size_t*)mmap(NULL, sizeof(size_t), PROT_READ|PROT_WRITE, MAP_ANONYMOUS|MAP_SHARED, 0, 0 );
+    *match_size = 0;
     
     
     // Fork process and check for errors
@@ -120,10 +129,9 @@ int main(int argc, char* argv[]) {
         wait(NULL);
 
         // Print results TODO
-        /*for (string s: *results) {
-            cout << "Printing Line..." << endl;
-            cout << s << endl;
-        }*/
+        for (size_t i = 0; i < *match_size; ++i) {
+            cout << shared_mem[i];
+        }
 
     } else {
         // in child
@@ -144,13 +152,14 @@ int main(int argc, char* argv[]) {
             // Create thread
             pthread_create(&threads[i], NULL, &FindMatchingLines, (void *)&thread_args[i]);
         }
+        cout << "threads created" << endl;
 
         /* Merge results */
         string intermediate = "";
-        vector<string> results;
+        size_t pos = 0;
         for (size_t i = 0; i < NUM_THREADS; ++i) {
 
-            // Get results of curr thread
+            // Get results of thread i
             pthread_join(threads[i], NULL);
             vector<string> v = thread_args[i].v;
 
@@ -158,14 +167,14 @@ int main(int argc, char* argv[]) {
             for (size_t j = 0; j < v.size(); ++j) {
                 // i.e. this string is a standalone line - already matched
                 if (j != 0 && intermediate.length() == 0 && v[j][v[j].length() - 1] == '\n') {
-                    results.push_back(v[j]);
+                    PushString(v[j], pos);
                 // i.e. this string is a continuation or beginning w/o endl
                 } else {
                     intermediate += v[j];
                     if (intermediate[intermediate.length() - 1] == '\n') {
                         // Test match since we couldn't do so in thread
                         if (regex_search(intermediate, reg))
-                            results.push_back(intermediate);
+                            PushString(intermediate, pos);
                         intermediate = "";
                     }
                 }
@@ -173,18 +182,17 @@ int main(int argc, char* argv[]) {
         }
         // Test very last string in case file didn't end with endl
         if (regex_search(intermediate, reg))
-                results.push_back(intermediate + '\n');
+                PushString(intermediate + '\n', pos);
 
-        // TODO remove
-        for (string s : results) {
-            cout << s;
-        }
+        // Pass match size to parent
+        *match_size = pos;
     }
 
     // Delete all remaining resources
     munmap(shared_mem, fsize);
     sem_destroy(semaphore);
     munmap(semaphore, sizeof(sem_t));
+    munmap(match_size, sizeof(size_t));
 
     return 0;
 }
