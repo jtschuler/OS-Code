@@ -165,16 +165,21 @@ int main(int argc, char* argv[]) {
 
             // Loop over each string in the thread
             for (size_t j = 0; j < v.size(); ++j) {
+
                 // i.e. this string is a standalone line - already matched
                 if (j != 0 && intermediate.length() == 0 && v[j][v[j].length() - 1] == '\n') {
                     PushString(v[j], pos);
+
                 // i.e. this string is a continuation or beginning w/o endl
                 } else {
                     intermediate += v[j];
                     if (intermediate[intermediate.length() - 1] == '\n') {
+
                         // Test match since we couldn't do so in thread
                         if (regex_search(intermediate, reg))
                             PushString(intermediate, pos);
+
+                        // Reset value
                         intermediate = "";
                     }
                 }
