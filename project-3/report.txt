@@ -1,0 +1,15 @@
+Project 3 Report
+Jadon T Schuler
+
+MapReduce is a method by which a program that is normally iterative can be
+split between multiple threads to be processed parallel-wise, which in turn
+speeds up the execution time. To perform MapReduce, we take a large data set,
+split it into equal sized pieces and run our algorithm on each piece in a
+thread (mapping), and then merge the results from each thread (reducing).
+
+Tools like Hadoop are popular because they provide an easy-to-use framework to
+perform MapReduce and parallel computing in general. The tool takes away the
+overhead of process management from the programmer's responsibility, and lets
+the programmer focus on the 'meat' of the problem they are working on. Parallel
+computing allows to process large data sets much quicker than before, which is
+why tools like these that make parallel computing accessible are so important.
