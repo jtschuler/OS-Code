@@ -24,3 +24,8 @@ clean:
 
 bin:
 	mkdir bin
+
+archive:
+	make clean
+	tar -cvzf ../project-3.tar.gz ../project-3
+
