@@ -2,6 +2,9 @@
 *.code-workspace
 project2
 project3
+sys-cs
+flib-cs
+shmem-cs
 *.tar.gz
 
 # Local History for Visual Studio Code
