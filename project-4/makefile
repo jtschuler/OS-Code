@@ -10,33 +10,33 @@ COMPILE = $(CC) $(CFLAGS) -c -o		# compile to .o files
 
 
 all:
-	make sys-lc
-	make flib-lc
-	make shmem-lc
+	make sys-cs
+	make flib-cs
+	make shmem-cs
 
-sys-lc: bin/sys-lc.o
+sys-cs: bin/sys-cs.o
 	$(LINK) $@ $^
 
-bin/sys-lc.o: src/sys-lc.cpp bin
+bin/sys-cs.o: src/sys-cs.cpp bin
 	$(COMPILE) $@ $<
 
-flib-lc: bin/flib-lc.o
+flib-cs: bin/flib-cs.o
 	$(LINK) $@ $^
 
-bin/flib-lc.o: src/flib-lc.cpp bin
+bin/flib-cs.o: src/flib-cs.cpp bin
 	$(COMPILE) $@ $<
 
-shmem-lc: bin/shmem-lc.o
+shmem-cs: bin/shmem-cs.o
 	$(LINK) $@ $^
 
-bin/shmem-lc.o: src/shmem-lc.cpp bin
+bin/shmem-cs.o: src/shmem-cs.cpp bin
 	$(COMPILE) $@ $<
 
 lint: src/*.cpp
 	cpplint --root=. $^
 
 clean:
-	rm -f bin/* sys-lc flib-lc shmem-lc
+	rm -f bin/* sys-cs flib-cs shmem-cs
 
 bin:
 	mkdir bin

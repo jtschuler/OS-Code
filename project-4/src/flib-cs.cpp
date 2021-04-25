@@ -1,10 +1,6 @@
 // Jadon Schuler
 // Copyright 2021
 
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-
 #include <iostream>
 
 #define BUF_SIZE 4096

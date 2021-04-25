@@ -1,7 +1,6 @@
 // Jadon Schuler
 // Copyright 2021
 
-#include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
 
