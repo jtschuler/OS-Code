@@ -15,22 +15,27 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
-    // Reads file name/size and target word from arguments
+    // Reads file name from arguments
     char * file = argv[1];
 
+    // Create file descriptors for read and write locations
     int fd_read;
     int fd_write;
 
+    // Open file descriptors and check for errors
     if ((fd_read = open(file, O_RDONLY)) == -1 ||
             (fd_write = open(file, O_WRONLY)) == -1) {
         perror("Error opening file");
         exit(1);
     }
 
+    // Create buffer and related variables
     char buf[BUF_SIZE];
     size_t bytes_read, bytes_written;
 
+    // Read from file until EOF
     while((bytes_read = read(fd_read, &buf, BUF_SIZE)) > 0) {
+        // Switch case of each character in the buffer
         for (size_t i = 0; i < bytes_read; ++i) {
             char c = buf[i];
             if (c < 91 && c > 64)
@@ -38,6 +43,7 @@ int main(int argc, char* argv[]) {
             else if (c > 96 && c < 123)
                 buf[i] = c - 32;
         }
+        // Write the buffer back into the file and check for errors
         bytes_written = write(fd_write, &buf, bytes_read);
         if (bytes_read != bytes_written) {
             perror("Error in file I/O");
@@ -45,6 +51,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    // Close file descriptors
     close(fd_read);
     close(fd_write);
 

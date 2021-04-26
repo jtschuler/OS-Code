@@ -12,22 +12,27 @@ int main(int argc, char* argv[]) {
         exit(1);
     }
 
-    // Reads file name/size and target word from arguments
+    // Reads file name from arguments
     char * file = argv[1];
 
+    // Create read file and write file
     FILE * f_read;
     FILE * f_write;
 
+    // Open both files and check for any errors
     if ((f_read = fopen(file, "r+")) == NULL ||
             (f_write = fopen(file, "r+")) == NULL) {
         perror("Error opening file");
         exit(1);
     }
 
+    // Create buffer and related variables
     char buf[BUF_SIZE];
     size_t bytes_read, bytes_written;
 
+    // Read from file until EOF
     while((bytes_read = fread(&buf, 1, BUF_SIZE, f_read)) > 0) {
+        // Switch case of each character in the buffer
         for (size_t i = 0; i < bytes_read; ++i) {
             char c = buf[i];
             if (c < 91 && c > 64)
@@ -35,6 +40,7 @@ int main(int argc, char* argv[]) {
             else if (c > 96 && c < 123)
                 buf[i] = c - 32;
         }
+        // Write the buffer back into the file and check for errors
         bytes_written = fwrite(&buf, 1, bytes_read, f_write);
         if (bytes_read != bytes_written) {
             perror("Error in file I/O");
@@ -42,6 +48,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    // Close files
     fclose(f_read);
     fclose(f_write);
 
