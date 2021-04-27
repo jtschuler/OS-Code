@@ -35,8 +35,10 @@ int main(int argc, char* argv[]) {
         // Switch case of each character in the buffer
         for (size_t i = 0; i < bytes_read; ++i) {
             char c = buf[i];
+            // Uppercase to lowercase
             if (c < 91 && c > 64)
                 buf[i] = c + 32;
+            // Lowercase to uppercase
             else if (c > 96 && c < 123)
                 buf[i] = c - 32;
         }

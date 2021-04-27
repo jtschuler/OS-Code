@@ -33,8 +33,10 @@ int main(int argc, char* argv[]) {
     // Switch case of every character
     for (size_t i = 0; i < length; ++i) {
         char c = shmem[i];
+        // Uppercase to lowercase
         if (c < 91 && c > 64)
             shmem[i] = c + 32;
+        // Lowercase to uppercase
         else if (c > 96 && c < 123)
             shmem[i] = c - 32;
     }
