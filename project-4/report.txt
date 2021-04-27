@@ -1,0 +1,25 @@
+Project 4 Report
+Jadon T Schuler
+
+The first method uses syscalls (open, read, write, close) to edit the file in
+question using a file descriptor. The second method uses the file library to do
+the same thing. Behind the scenes, this method is still using syscalls, but the
+library takes care of that work for the programmer. The final method (shared
+memory), bypasses the need for syscalls altogether (beyond the first open) by
+putting the file into the memory space of the program and editing it directly.
+
+As mentioned above, a file pointer differs from a file descriptor in the sense
+that a file descriptor is a very low level method for work with files. A file
+pointer, meanwhile, uses file descriptors behind the scenes, but adds extra
+functionality for the programmer to make file I/O a bit easier. File
+descriptors point to an open file description, which is a struct that contains
+data about the open file, such as mode and position.
+
+/proc is a pseudo-filesystem in UNIX systems that can be used to gain access to
+kernel space data from the userspace. /proc/cmdline stores the arguments that
+were passed to the kernel during the boot. /proc/cmdline shows information
+about the cryptosystems that the OS provides. I noticed RSA and AES were both
+on the list, both of which I am familiar with. I couldn't find anything related
+to NTRU or ECC (elliptic curve cryptography), but I may have missed them.
+/proc/stat displays statistics about the kernel. My system has currently
+undergone 11786714 context switches!
